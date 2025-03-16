@@ -1,0 +1,150 @@
+---
+title: "HR PROJ"
+author: "A J Dazzle_21MIA1119"
+date: "2025-03-10"
+output:
+  html_document: default
+  pdf_document: default
+---
+```{r}
+#install.packages("readxl")
+```
+
+```{r}
+library(readxl)
+```
+
+
+```{r}
+data1=read_excel("C:/Users/dazzl/OneDrive/Desktop/VIT/HR/proj/DATA/Hero_TamilNadu_Training_Data.xlsx")
+data2=read_excel("C:/Users/dazzl/OneDrive/Desktop/VIT/HR/proj/DATA/Sales_Service_Performance.xlsx")
+data3=read_excel("C:/Users/dazzl/OneDrive/Desktop/VIT/HR/proj/DATA/Sri_Vinayaka_Training_Data.xlsx")
+data4=read_excel("C:/Users/dazzl/OneDrive/Desktop/VIT/HR/proj/DATA/Standardized_Training_Programs.xlsx")
+```
+
+```{r}
+colnames(data1)
+```
+```{r}
+colnames(data2)
+```
+
+```{r}
+colnames(data3)
+```
+
+```{r}
+colnames(data4)
+```
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+head(data3,10)
+```
+
+```{r}
+e <- data1 %>%
+  rename(
+    T_B = `Training Budget (INR)`,
+    T_F = `Training Frequency`,
+    NO_E_T = `Number of Employees Trained`,
+    E_S = `Employee Satisfaction (1 to 5)`
+  )
+head(data1)
+e <- e %>% select(
+  -Dealership, 
+  -`Training Hours per Employee`, 
+  -`Training Type`, 
+  -`Percentage of Workforce Trained (%)`, 
+  -`Sales or Service`
+)
+head(e)
+
+
+```
+
+```{r}
+e$Category_Numeric <- recode(e$T_F, "Monthly" = 3, "Quarterly" = 2,"Yearly"=1)
+x=cor(e$E_S,e[,c("T_B","NO_E_T","Category_Numeric")])
+x
+```
+```{r}
+e$Category_Numeric <- recode(e$T_F, "Monthly" = 3, "Quarterly" = 2,"Yearly"=1)
+
+```
+
+```{r}
+m <- recode(data3$`Performance Improvement`, "Improved" = 3, "Declined" = 2,"Same"=1)
+xx=cor(data3$`Training Cost (INR)`,m)
+xx
+```
+```{r}
+m <- recode(data3$`Performance Improvement`, "Improved" = 3, "Declined" = 2,"Same"=1)
+```
+
+```{r}
+xx2=cor(data3$`Employee Rating (After)`,data3$`Training Cost (INR)`,)
+xx2
+```
+
+```{r}
+xx3=cor(data3$`Target After Training`,data3$`Training Cost (INR)`)
+xx3
+```
+
+```{r}
+aaa=recode(data4$Manufacturer_Training_Provided,"yes"=1,"no"=2,"Yes"=1,"No"=2)
+xy=cor(aaa,data4[,c("Employee_Satisfaction_Score","Sales_Performance","Shift_Optimization_Score","Workforce_Productivity_Score","Customer_Complaints_Resolution_Time","Customer_Service_Satisfaction_Score")])
+xy
+```
+
+```{r}
+sum(is.na(data4))
+```
+
+```{r}
+model=lm(data4$Sales_Performance~aaa)
+summary(model)
+```
+
+```{r}
+model1=lm(aaa~data4$Employee_Satisfaction_Score+data4$Sales_Performance+data4$Shift_Optimization_Score+data4$Workforce_Productivity_Score+data4$Customer_Complaints_Resolution_Time+data4$Customer_Service_Satisfaction_Score)
+summary(model1)
+```
+
+```{r}
+library(car)
+vif_model <- lm(aaa ~ data4$Employee_Satisfaction_Score + data4$Sales_Performance + 
+    data4$Shift_Optimization_Score + data4$Workforce_Productivity_Score + 
+    data4$Customer_Complaints_Resolution_Time + data4$Customer_Service_Satisfaction_Score, data = data4)
+
+vif(vif_model)  # If VIF > 5, high multicollinearity is present
+
+```
+```{r}
+library(randomForest)
+rf_model <- randomForest(aaa ~ ., data = data4, importance = TRUE)
+importance(rf_model)
+
+```
+```{r}
+aka=cor(data1$`Employee Satisfaction (1 to 5)`, data1$`Training Hours per Employee`)
+aka
+```
+```{r}
+colnames(data1) <- make.names(colnames(data1))
+colnames(data1)  # Check updated names
+akaa <- randomForest(Employee.Satisfaction..1.to.5. ~ ., data = data1, importance = TRUE)
+importance(akaa)
+
+```
+
+```{r}
+#modellll=lm(data1$`Employee Satisfaction (1 to 5)`~data1$`Training Hours per Employee`)
+#summary(modellll)
+```
+
+
